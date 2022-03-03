@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Wordler</title>
+  <script type="text/javascript" src="script.js" defer></script>
+</head>
+<body>
+  <div data-search class="search">
+    <div class="tile" id="1" data-rounded data-unselect></div>
+    <div class="tile" id="2" data-rounded data-unselect></div>
+    <div class="tile" id="3" data-rounded data-unselect></div>
+    <div class="tile" id="4" data-rounded data-unselect></div>
+    <div class="tile" id="5" data-rounded data-unselect></div>
+    <div data-letter></div>
+    <button class="enter" onclick="submit()" data-enter data-extra-rounded data-unselect>Enter</button>
+  </div> 
+  <div class="clear" onclick="clear()" data-clear data-extra-rounded data-unselect>X</div>
+  <div class="incorrect-container">
+      <input type="text" class="incorrect" placeholder="Enter incorrect letters" data-incorrect="true" onchange="validate">
+    </div>
+  <div class="results" data-results>
+      <div class="result" data-result data-number data-unselect id="keep">0 words</div>
+  </div>
+</body>
+</html>
