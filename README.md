@@ -1,4 +1,4 @@
-# WordleWordSearch
+# Wordle Word Search
  Wordle Word Search helps you Wordle better by giving you a list of available words based on the letters you have narrowed down
 ## How to Use
 * Type in any letters you know are in the word, and type in periods where you don't know the letter. The letters you type in will automatically show up as green, but you can click on them to turn them orange. Type in any letters you know aren't in the word in the input field. Hit the X button to clear your search in both the input field and the word and clear any search results.
