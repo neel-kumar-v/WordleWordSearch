@@ -12972,6 +12972,28 @@ const dictionary = [
   "zymic"
 ]
 
+// let dictionary1 = []
+// parseDictionary = async () => {
+//   try {
+//     response = await fetch('words.json')
+//     const data = await response.json()
+//     return data
+//   } catch(error) {
+//     console.log("Error getting data", error)
+//   }
+// }
+// dictionary1 = async () => {
+//   let temp = []
+//   try {
+//     temp = await parseDictionary()
+//   } catch(error) {
+//     console.log("Error getting data", error)
+//   }
+//   return temp
+// };
+
+// console.log(dictionary1)
+
 const search = document.querySelector("[data-search]")
 
 const allTiles = search.querySelectorAll('.tile')
@@ -13043,6 +13065,7 @@ function deleteKey() {
 function submit() {
   if(!readyToSearch) return
   clearResults(resultDOM)
+  if(!validate()) return
   const regexSearches = createRegex()
   let result = dictionary.filter(word => word.match(regexSearches[0]) && word.match(regexSearches[1]))
   result = result.filter(word => word.match(regexSearches[2]))
@@ -13102,10 +13125,8 @@ function createRegex() {
     }
   })
 
-  let regexWrong = "^"
-  
-  if(!validate()) return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
 
+  let regexWrong = "^"
   let regexWrongTS = "(?!.*"
   let regexWrongTE = ")"
 
@@ -13113,19 +13134,59 @@ function createRegex() {
     regexWrong += regexWrongTS + incorrectDOM.value[i] + regexWrongTE
   }
 
-  return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
+  const returnValue = [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
+  console.log(returnValue, "rupee");
+
+  return returnValue
 }
+
+
 
 function validate() {
   let validated = true
-  for (let i in incorrectDOM.value) {
-    const char = incorrectDOM.value[i];
-    if(!/[abcdefghijklmnopqrstuvwxyz]/.test(char)) {
-      validated = false
-      break
-    }
-  }
+  let searchedWord = ""
+  allTiles.forEach(tile => {
+    searchedWord += tile.dataset.letter
+  })
+  validated = checkAlphabet(incorrectDOM.value)
+  if(validated == false) return validated
+  checkforSameCharacterInQuery(incorrectDOM.value)
+  validated = checkForSameCharacterInSearchAndQuery(searchedWord, incorrectDOM.value)
   return validated
+
+}
+
+function checkforSameCharacterInQuery(query) {
+  if(/(.).*\1/.test(query)) {
+    alert("Refrain from putting the same letter twice in the 'Incorrect Letters' input field")
+  }
+}
+
+function checkForSameCharacterInSearchAndQuery(search, query)
+{
+    var map = new Map();
+    for (let i in search) {
+      const char = search[i]
+      if(map.has(char.charCodeAt(0))) map[char.charCodeAt(0)]++
+      else map[char.charCodeAt(0)] = 1;
+    }
+    for (let i in query)
+      if (map[query[i].charCodeAt(0)] > 0) {
+        alert("Do not put a letter as a 'correct' or 'wrong location' letter in the search and also put it as an 'incorrect letter' in the input field")
+        return true;
+      }
+      
+    return false;
+}
+function checkAlphabet(incorrectCharacters) {
+  for (let i in incorrectCharacters) {
+    const char = incorrectCharacters[i];
+    if(!/[abcdefghijklmnopqrstuvwxyz]/.test(char)) {
+      alert("Do not use non-alphabet characters")
+      return false
+    }
+  } 
+  return true
 }
 
 function addKey(key, tile) {
