@@ -7,4 +7,6 @@
 * Hit the X button to clear everything, or just change your search and hit enter again to refresh your search
 ## Known Issues
 * Support for multiple of the same orange letters(currently treats it as if there is only one orange letter)
+## Features To Add
 * How To Use panel
+* Filter for only Wordle Answer words
