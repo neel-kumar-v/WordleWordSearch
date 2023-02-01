@@ -1,3 +1,192 @@
+const search = document.querySelector("[data-search]")
+
+const allTiles = search.querySelectorAll('.tile')
+
+let editableTile = search.querySelector(".tile")
+editableTile.dataset.state = "active"
+
+const resultDOM = document.querySelector("[data-results]")
+
+const incorrectDOM = document.querySelector("[data-incorrect='true']")
+
+const enterDOM = document.querySelector("[data-enter]")
+
+const wordCountDOM = document.querySelector('[data-number]')
+
+document.addEventListener("keydown", handleKeyPress)
+document.addEventListener("click", handleClick)
+
+let readyToSearch = false
+
+function handleKeyPress(e) {
+  if(e.key === "Enter") {
+    submit()
+    return
+  }
+  if(document.activeElement.dataset.incorrect == "true") return
+  editableTile = search.querySelector(":not([data-letter])")
+  if(e.key === "Backspace" || e.key === "Delete") {
+    deleteKey(editableTile)
+    return
+  }
+  if(editableTile == null) return
+  if(e.key.length > 1) return
+  if(e.key.match(/[a-z]/) || e.key === ".") {
+    addKey(e.key, editableTile)
+    return
+  }
+}
+
+function handleClick(e) {
+  if (search == e.target && !search.contains(e.target)) return
+  allTiles.forEach((tile) => {
+    if(tile != e.target && !tile.contains(e.target)) return 
+    if(tile.dataset.state == "location") {
+      tile.dataset.state = "correct"
+      return
+    }
+    if (tile.dataset.state === null || tile.dataset.state != "correct") return
+    tile.dataset.state = "location"
+  })
+  if(e.target.dataset.clear == '') {
+    clear()
+  }
+}
+
+function deleteKey() {
+  const activeTiles = getTypedTiles()
+  let lastTile = activeTiles[activeTiles.length - 1]
+
+  reset(lastTile)
+  
+  readyToSearch = false
+  
+  newTile = search.querySelector('[data-state="active"]')
+  if(newTile == null) return
+  delete newTile.dataset.state
+}
+
+function submit() {
+  if(!readyToSearch) return
+  clearResults(resultDOM)
+  // const regexSearches = createRegex()
+  // let result = dictionary.filter(word => word.match(regexSearches[0]) && word.match(regexSearches[1]))
+  // result = result.filter(word => word.match(regexSearches[2]))\
+  const regexSearch = createRegex()
+  let result = dictionary.filter(word => word.match(regexSearch))
+  wordCountDOM.textContent = result.length.toString() + " words"
+  result.forEach((word) => createCard(word))
+}
+
+function createCard(word) {
+  let card = document.createElement("div")
+  card.textContent = word
+  card.classList.add("result")
+  card.setAttribute('extra-rounded', '')
+  card.setAttribute('unselect', '')
+  resultDOM.append(card)
+}
+
+function clearResults(parent) {
+  while(parent.lastChild) {
+    if(parent.lastChild.id == 'keep') break
+    parent.removeChild(parent.lastChild)
+  }
+}
+
+function clear() {
+  clearResults(resultDOM)
+  wordCountDOM.textContent = "0 words"
+  incorrectDOM.value = ""
+  for (let i = 0; i < allTiles.length; i++) {
+    const tile = allTiles[i];
+    reset(tile)
+  }
+  const newTile = search.querySelector('.tile')
+  newTile.dataset.state = 'active'
+}
+
+function reset(tile) {
+  if(tile == null) return
+  tile.textContent = ""
+  delete tile.dataset.state
+  delete tile.dataset.letter
+}
+
+function createRegex() {
+  let regexCorrect = ""
+  let regexCorrectTS = "[^"
+  let regexCorrectTE = "]"
+
+  let regexLocation = "^"
+  let regexLocationTS = "(?=.*"
+  let regexLocationTE = ")"
+
+  allTiles.forEach((tile) => {
+    
+    if(tile.dataset.state != "location") {
+      regexCorrect = regexCorrect.concat(tile.dataset.letter)
+      return
+    } else {
+      regexCorrect += regexCorrectTS + tile.dataset.letter + regexCorrectTE
+      regexLocation += regexLocationTS + tile.dataset.letter + regexLocationTE
+    }
+  })
+
+  let regexWrong = "^"
+
+  let totalRegex = "(?=.*(" + regexCorrect + "))" + "(?=.*(" + regexLocation + "))" + "(?=.*(" + regexWrong + "))"
+  
+  // if(!validate()) return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
+  if(!validate()) return totalRegex
+
+  let regexWrongTS = "(?!.*"
+  let regexWrongTE = ")"
+
+  for(let i in incorrectDOM.value) {
+    regexWrong += regexWrongTS + incorrectDOM.value[i] + regexWrongTE
+  }
+
+  totalRegex = "(?=.*(" + regexCorrect + "))" + "(?=.*(" + regexLocation + "))" + "(?=.*(" + regexWrong + "))"
+
+  console.log(totalRegex)
+
+  // return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
+  return totalRegex
+}
+
+function validate() {
+  let validated = true
+  for (let i in incorrectDOM.value) {
+    const char = incorrectDOM.value[i];
+    if(!/[abcdefghijklmnopqrstuvwxyz]/.test(char)) {
+      validated = false
+      break
+    }
+  }
+  return validated
+}
+
+function addKey(key, tile) {
+  if(tile.className == "enter" || tile.className == "") {
+    readyToSearch = true
+    return
+  }
+  tile.dataset.letter = key.toLowerCase();
+  tile.textContent = key
+  tile.dataset.state = key === "." ? "wrong" : "correct"
+
+  const nextTile = search.querySelector(":not([data-letter])")
+  if(nextTile === null || nextTile.className == "enter" || tile.className == "") {
+    readyToSearch = true
+    return
+  }
+  nextTile.dataset.state = "active"
+}
+
+function getTypedTiles() {
+  return search.querySelectorAll('[data-state="correct"], [data-state="wrong"], [data-state="location"]')
+}
 
 const dictionary = [
   "cigar", 
@@ -12972,180 +13161,3 @@ const dictionary = [
   "zymes", 
   "zymic"
 ]
-
-const search = document.querySelector("[data-search]")
-
-const allTiles = search.querySelectorAll('.tile')
-
-let editableTile = search.querySelector(".tile")
-editableTile.dataset.state = "active"
-
-const resultDOM = document.querySelector("[data-results]")
-
-const incorrectDOM = document.querySelector("[data-incorrect='true']")
-
-const enterDOM = document.querySelector("[data-enter]")
-
-const wordCountDOM = document.querySelector('[data-number]')
-
-document.addEventListener("keydown", handleKeyPress)
-document.addEventListener("click", handleClick)
-
-let readyToSearch = false
-
-function handleKeyPress(e) {
-  if(e.key === "Enter") {
-    submit()
-    return
-  }
-  if(document.activeElement.dataset.incorrect == "true") return
-  editableTile = search.querySelector(":not([data-letter])")
-  if(e.key === "Backspace" || e.key === "Delete") {
-    deleteKey(editableTile)
-    return
-  }
-  if(editableTile == null) return
-  if(e.key.length > 1) return
-  if(e.key.match(/[a-z]/) || e.key === ".") {
-    addKey(e.key, editableTile)
-    return
-  }
-}
-
-function handleClick(e) {
-  if (search == e.target && !search.contains(e.target)) return
-  allTiles.forEach((tile) => {
-    if(tile != e.target && !tile.contains(e.target)) return 
-    if(tile.dataset.state == "location") {
-      tile.dataset.state = "correct"
-      return
-    }
-    if (tile.dataset.state === null || tile.dataset.state != "correct") return
-    tile.dataset.state = "location"
-  })
-  if(e.target.dataset.clear == '') {
-    clear()
-  }
-}
-
-function deleteKey() {
-  const activeTiles = getTypedTiles()
-  let lastTile = activeTiles[activeTiles.length - 1]
-
-  reset(lastTile)
-  
-  readyToSearch = false
-  
-  newTile = search.querySelector('[data-state="active"]')
-  if(newTile == null) return
-  delete newTile.dataset.state
-}
-
-function submit() {
-  if(!readyToSearch) return
-  clearResults(resultDOM)
-  const regexSearches = createRegex()
-  let result = dictionary.filter(word => word.match(regexSearches[0]) && word.match(regexSearches[1]))
-  result = result.filter(word => word.match(regexSearches[2]))
-  wordCountDOM.textContent = result.length.toString() + " words"
-  result.forEach((word) => {
-    let card = document.createElement("div")
-    card.textContent = word
-    card.classList.add("result")
-    card.setAttribute('extra-rounded', '')
-    resultDOM.append(card)
-  })
-}
-
-function clearResults(parent) {
-  while(parent.lastChild) {
-    if(parent.lastChild.id == 'keep') break
-    parent.removeChild(parent.lastChild)
-  }
-}
-
-function clear() {
-  clearResults(resultDOM)
-  wordCountDOM.textContent = "0 words"
-  incorrectDOM.value = ""
-  for (let i = 0; i < allTiles.length; i++) {
-    const tile = allTiles[i];
-    reset(tile)
-  }
-  const newTile = search.querySelector('.tile')
-  newTile.dataset.state = 'active'
-}
-
-function reset(tile) {
-  if(tile == null) return
-  tile.textContent = ""
-  delete tile.dataset.state
-  delete tile.dataset.letter
-}
-
-function createRegex() {
-  let regexCorrect = ""
-  let regexCorrectTS = "[^"
-  let regexCorrectTE = "]"
-
-  let regexLocation = "^"
-  let regexLocationTS = "(?=.*"
-  let regexLocationTE = ")"
-
-  allTiles.forEach((tile) => {
-    
-    if(tile.dataset.state != "location") {
-      regexCorrect = regexCorrect.concat(tile.dataset.letter)
-      return
-    } else {
-      regexCorrect += regexCorrectTS + tile.dataset.letter + regexCorrectTE
-      regexLocation += regexLocationTS + tile.dataset.letter + regexLocationTE
-    }
-  })
-
-  let regexWrong = "^"
-  
-  if(!validate()) return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
-
-  let regexWrongTS = "(?!.*"
-  let regexWrongTE = ")"
-
-  for(let i in incorrectDOM.value) {
-    regexWrong += regexWrongTS + incorrectDOM.value[i] + regexWrongTE
-  }
-
-  return [new RegExp(regexCorrect), new RegExp(regexLocation), new RegExp(regexWrong)]
-}
-
-function validate() {
-  let validated = true
-  for (let i in incorrectDOM.value) {
-    const char = incorrectDOM.value[i];
-    if(!/[abcdefghijklmnopqrstuvwxyz]/.test(char)) {
-      validated = false
-      break
-    }
-  }
-  return validated
-}
-
-function addKey(key, tile) {
-  if(tile.className == "enter" || tile.className == "") {
-    readyToSearch = true
-    return
-  }
-  tile.dataset.letter = key.toLowerCase();
-  tile.textContent = key
-  tile.dataset.state = key === "." ? "wrong" : "correct"
-
-  const nextTile = search.querySelector(":not([data-letter])")
-  if(nextTile === null || nextTile.className == "enter" || tile.className == "") {
-    readyToSearch = true
-    return
-  }
-  nextTile.dataset.state = "active"
-}
-
-function getTypedTiles() {
-  return search.querySelectorAll('[data-state="correct"], [data-state="wrong"], [data-state="location"]')
-}

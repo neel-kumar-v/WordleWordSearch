@@ -11,13 +11,24 @@ body {
   margin: 0;
   padding: 1em;
   font-size: clamp(.5rem, 2.5vmin, 1.5rem);
-  overflow: hidden
+  overflow: hidden;
+}
+header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  padding: 0 16px;
+  flex-grow: 1;
+  color: var(--color-tone-1);
+  border-bottom: 1px solid var(--color-tone-4);
 }
 .search {
   display: grid;
   justify-content: center;
   align-content: center;
-  height: 10vh;
+  flex-grow: 1;
   grid-template-columns: repeat(8, 4em);
   grid-template-rows: repeat(1, 4em);
   gap: .25em;
@@ -60,11 +71,11 @@ body {
 .results {
   display: grid;
   justify-content: center;
-  height: content;
-  grid-template-columns: repeat(1, 20em);
-  grid-template-rows: repeat(100000, 3em);
+  flex-grow: 7;
+  grid-auto-columns: 20em;
+  grid-auto-rows: 3em;
   gap: 1em;
-
+  height: 75vh;
   overflow-y: scroll;
 }
 
@@ -77,7 +88,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-
   transition: 0.3s ease-in-out;
 }
 .result[data-number] {
@@ -119,16 +129,6 @@ body {
 .enter {
   grid-column: span 2;
   font-size: 2em;
-  font-weight: bold;
-  color: white;
-  background-color: transparent;
-  border: 0.05em solid hsl(240, 2%, 23%);
-  text-transform: uppercase;
-  display: flex;
-  justify-content: center;
-  align-self: center;
-  text-align: center;
-  transition: 0.3s ease-in-out;
 }
 
 .incorrect-container {
@@ -136,30 +136,26 @@ body {
   justify-content: center;
   padding: 15px 0 0;
   margin-top: 10px;
-
 }
-
-.incorrect {
-  width: auto;
-  min-width: 35rem;
-  height: 3em;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  margin-left: 1rem;
-  margin-right: 1rem;
-  padding: 0.5rem;
-  background-color: transparent;
-  border: .05em solid hsl(240, 2%, 23%);
-  font-size: 2rem;
+.enter, .incorrect {
   color: white;
-  text-transform: uppercase;
   font-weight: bold;
+  background-color: transparent;
+  border: 0.05em solid hsl(240, 2%, 23%);
+  text-transform: uppercase;
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
   transition: 0.3s ease-in-out;
-  text-align: center;
-  text-align: center;
+}
+.incorrect {
+  width: clamp(35rem, auto, auto);
+  min-width: 35rem;
+  height: 3em;
+  margin: 1rem 1rem 1rem 2rem;
+  padding: 0.5rem;
+  font-size: 2rem;
 }
 
 [data-rounded] {
