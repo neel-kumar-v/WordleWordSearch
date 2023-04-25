@@ -167,11 +167,6 @@ function validate() {
   return validated
 }
 
-function submit() {
-  for(let i in allTiles) {
-    
-  }
-}
 
 function addKey(key, tile) {
   if(tile.className == "enter" || tile.className == "") {
